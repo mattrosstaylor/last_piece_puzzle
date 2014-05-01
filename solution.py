@@ -5,8 +5,6 @@
 #         Matt R Taylor        #
 ################################
 
-import copy
-
 ###################
 # Utility Classes #
 ###################
@@ -63,7 +61,7 @@ class Board:
 		else:
 			return False
 
-	 # places a piece at the given position and orientation
+	# places a piece at the given position and orientation
 	def place(self, piece, x, y, orientation):
 		for part in piece.shape:
 			if orientation == 0:
@@ -75,6 +73,19 @@ class Board:
 			elif orientation == 3:
 				self.grid[x+part[1]][y-part[0]] = piece.name
 		self.order.append(piece.name)
+
+	# remove a piece from the given position and orientation
+	def remove(self, piece, x, y, orientation):
+		for part in piece.shape:
+			if orientation == 0:
+				self.grid[x+part[0]][y+part[1]] = self.empty
+			elif orientation == 1:
+				self.grid[x-part[1]][y+part[0]] = self.empty
+			elif orientation == 2:
+				self.grid[x-part[0]][y-part[1]] = self.empty
+			elif orientation == 3:
+				self.grid[x+part[1]][y-part[0]] = self.empty
+		self.order.pop()
 
 	# process a piece as a placement candidate
 	# for a given piece and orientation, add  tuple (piece, x, y orientation) to the lookup list for each cell covered by the piece
@@ -229,11 +240,11 @@ def solve(board, targetCellIndex, piecesLeft):
 	for c in candidateBoard.grid[targetCell[0]][targetCell[1]]:
 		if c[0].name in piecesLeft:
 			if board.test(c[0],c[1],c[2],c[3]):
-				boardCopy = copy.deepcopy(board)
-				piecesLeftCopy = copy.copy(piecesLeft)
-				piecesLeftCopy.remove(c[0].name)
-				boardCopy.place(c[0],c[1],c[2],c[3])
-				solve(boardCopy, targetCellIndex+1, piecesLeftCopy)
+				piecesLeft.remove(c[0].name)
+				board.place(c[0],c[1],c[2],c[3])
+				solve(board, targetCellIndex+1, piecesLeft)
+				board.remove(c[0],c[1],c[2],c[3])
+				piecesLeft.add(c[0].name)
 
 #########
 # Start #
